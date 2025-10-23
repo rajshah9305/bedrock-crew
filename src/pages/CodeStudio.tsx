@@ -45,16 +45,17 @@ router.post('/api/users', async (req, res) => {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
-          <Card className="shadow-card overflow-hidden">
-            <div className="bg-secondary/50 px-4 py-3 border-b border-border flex items-center justify-between">
-              <span className="text-sm font-medium">main.js</span>
-              <div className="flex gap-2">
+          <Card className="shadow-card hover:shadow-elevated transition-shadow overflow-hidden border-2 border-border/50">
+            <div className="bg-gradient-card px-5 py-3 border-b-2 border-border/50 flex items-center justify-between">
+              <span className="text-sm font-semibold tracking-tight">main.js</span>
+              <div className="flex gap-1">
                 {suggestions.map((action) => (
                   <Button
                     key={action.label}
                     variant="ghost"
                     size="sm"
-                    className="h-8 hover:bg-primary/10 hover:text-primary"
+                    className="h-9 px-3 hover:bg-primary/10 hover:text-primary transition-all"
+                    title={action.description}
                   >
                     <action.icon className="h-4 w-4" />
                   </Button>
@@ -64,19 +65,21 @@ router.post('/api/users', async (req, res) => {
             <Textarea
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              className="min-h-[400px] font-mono text-sm border-0 rounded-none resize-none focus-visible:ring-0"
+              className="min-h-[400px] font-mono text-sm border-0 rounded-none resize-none focus-visible:ring-0 leading-relaxed"
             />
           </Card>
 
-          <Card className="p-4 shadow-card bg-gradient-card">
-            <div className="flex items-start gap-3">
-              <Sparkles className="h-5 w-5 text-primary mt-0.5" />
+          <Card className="p-5 shadow-card hover:shadow-elevated transition-shadow bg-gradient-card border-2 border-primary/20">
+            <div className="flex items-start gap-4">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
               <div className="flex-1">
-                <p className="text-sm font-medium mb-1">AI Suggestion</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm font-semibold mb-2">AI Suggestion</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Add input validation using express-validator before creating users. This will prevent invalid data from being saved to the database.
                 </p>
-                <Button size="sm" className="mt-3 bg-primary hover:bg-primary/90">
+                <Button size="sm" className="mt-4 bg-primary hover:bg-primary/90 shadow-sm hover:shadow-md transition-all">
                   Apply Changes
                 </Button>
               </div>
@@ -85,46 +88,46 @@ router.post('/api/users', async (req, res) => {
         </div>
 
         <div className="space-y-4">
-          <Card className="p-6 shadow-card">
-            <h3 className="text-lg font-semibold mb-4">AI Actions</h3>
+          <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow">
+            <h3 className="text-lg font-semibold mb-5 tracking-tight">AI Actions</h3>
             <div className="space-y-2">
               {suggestions.map((action) => (
                 <Button
                   key={action.label}
                   variant="outline"
-                  className="w-full justify-start hover:border-primary hover:bg-primary/5"
+                  className="w-full justify-start hover:border-primary hover:bg-primary/5 transition-all p-4 h-auto"
                 >
-                  <action.icon className="mr-3 h-4 w-4" />
+                  <action.icon className="mr-3 h-5 w-5 flex-shrink-0" />
                   <div className="text-left">
-                    <p className="font-medium">{action.label}</p>
-                    <p className="text-xs text-muted-foreground">{action.description}</p>
+                    <p className="font-semibold text-sm">{action.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{action.description}</p>
                   </div>
                 </Button>
               ))}
             </div>
           </Card>
 
-          <Card className="p-6 shadow-card">
-            <h3 className="text-lg font-semibold mb-4">Code Analysis</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Complexity</span>
-                <span className="text-sm font-medium text-success">Low</span>
+          <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow">
+            <h3 className="text-lg font-semibold mb-5 tracking-tight">Code Analysis</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-card">
+                <span className="text-sm font-medium">Complexity</span>
+                <span className="text-sm font-bold text-success">Low</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Issues Found</span>
-                <span className="text-sm font-medium text-warning">2</span>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-card">
+                <span className="text-sm font-medium">Issues Found</span>
+                <span className="text-sm font-bold text-warning">2</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Test Coverage</span>
-                <span className="text-sm font-medium text-muted-foreground">0%</span>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-card">
+                <span className="text-sm font-medium">Test Coverage</span>
+                <span className="text-sm font-bold text-muted-foreground">0%</span>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 shadow-card bg-gradient-hero text-primary-foreground">
-            <h3 className="text-lg font-semibold mb-2">Pro Tip</h3>
-            <p className="text-sm opacity-90">
+          <Card className="p-6 shadow-card bg-gradient-hero text-primary-foreground border-2 border-primary">
+            <h3 className="text-lg font-semibold mb-2.5">Pro Tip</h3>
+            <p className="text-sm opacity-95 leading-relaxed">
               Use the Explain feature to understand unfamiliar code patterns. The AI will break down complex logic into simple steps.
             </p>
           </Card>

@@ -14,13 +14,13 @@ const Layout = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-gradient-hero">
+        <div className="container flex h-16 items-center justify-between px-6 max-w-7xl mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-gradient-hero shadow-md">
               <Brain className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">AI Agentic Pipeline</h1>
+              <h1 className="text-xl font-bold tracking-tight">AI Agentic Pipeline</h1>
               <p className="text-xs text-muted-foreground">CrewAI × AWS Bedrock</p>
             </div>
           </div>
@@ -32,10 +32,10 @@ const Layout = () => {
                 to={item.href}
                 end={item.href === "/"}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
                   }`
                 }
               >
@@ -47,7 +47,7 @@ const Layout = () => {
         </div>
       </header>
 
-      <main className="container py-8 px-6">
+      <main className="container py-8 px-6 max-w-7xl mx-auto">
         <Outlet />
       </main>
     </div>

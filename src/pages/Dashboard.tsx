@@ -31,52 +31,57 @@ const Dashboard = () => {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.label} className="p-6 shadow-card hover:shadow-elevated transition-shadow">
+          <Card key={stat.label} className="p-6 shadow-card hover:shadow-elevated transition-all duration-200 border-l-4 border-l-transparent hover:border-l-primary">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="text-3xl font-bold mt-2">{stat.value}</p>
+                <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                <p className="text-3xl font-bold mt-2 tracking-tight">{stat.value}</p>
               </div>
-              <stat.icon className={`h-8 w-8 ${stat.color}`} />
+              <div className="p-3 rounded-xl bg-secondary">
+                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+              </div>
             </div>
           </Card>
         ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="p-6 shadow-card">
-          <h3 className="text-lg font-semibold mb-4">Active Agents</h3>
-          <div className="space-y-4">
-            {["Planner", "Researcher", "Coder", "Reviewer"].map((agent, i) => (
-              <div key={agent} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+        <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow">
+          <h3 className="text-lg font-semibold mb-6 tracking-tight">Active Agents</h3>
+          <div className="space-y-3">
+            {["Planner", "Researcher", "Coder", "Reviewer"].map((agent) => (
+              <div key={agent} className="flex items-center justify-between p-4 rounded-lg bg-gradient-card border border-border/50 hover:border-primary/30 transition-all">
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full bg-agent-${agent.toLowerCase()} animate-pulse`} />
+                  <div className={`w-3 h-3 rounded-full bg-agent-${agent.toLowerCase()} animate-pulse shadow-sm`} />
                   <span className="font-medium">{agent} Agent</span>
                 </div>
-                <span className="text-sm text-success">Active</span>
+                <span className="text-sm font-medium text-success flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-success" />
+                  Active
+                </span>
               </div>
             ))}
           </div>
         </Card>
 
-        <Card className="p-6 shadow-card">
-          <h3 className="text-lg font-semibold mb-4">Recent Tasks</h3>
+        <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow">
+          <h3 className="text-lg font-semibold mb-6 tracking-tight">Recent Tasks</h3>
           <div className="space-y-3">
             {recentTasks.map((task) => (
-              <div key={task.id} className="p-3 rounded-lg border border-border hover:border-primary/50 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <p className="text-sm font-medium">{task.task}</p>
+              <div key={task.id} className="p-4 rounded-lg border border-border hover:border-primary/40 hover:bg-secondary/30 transition-all cursor-pointer">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <p className="text-sm font-medium leading-snug flex-1">{task.task}</p>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full ${
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${
                       task.status === "completed"
-                        ? "bg-success/10 text-success"
-                        : "bg-warning/10 text-warning"
+                        ? "bg-success/10 text-success border border-success/20"
+                        : "bg-warning/10 text-warning border border-warning/20"
                     }`}
                   >
                     {task.status}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground">Agent: {task.agent}</p>
+                <p className="text-xs text-muted-foreground font-medium">Agent: {task.agent}</p>
               </div>
             ))}
           </div>

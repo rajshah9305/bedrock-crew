@@ -25,11 +25,11 @@ const Analytics = () => {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {metrics.map((metric) => (
-          <Card key={metric.label} className="p-6 shadow-card">
-            <p className="text-sm text-muted-foreground">{metric.label}</p>
-            <div className="flex items-end justify-between mt-2">
-              <p className="text-3xl font-bold">{metric.value}</p>
-              <span className="text-sm text-success flex items-center gap-1">
+          <Card key={metric.label} className="p-6 shadow-card hover:shadow-elevated transition-all duration-200 border-l-4 border-l-transparent hover:border-l-primary">
+            <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
+            <div className="flex items-end justify-between mt-3">
+              <p className="text-3xl font-bold tracking-tight">{metric.value}</p>
+              <span className="text-sm font-semibold text-success flex items-center gap-1 bg-success/10 px-2 py-1 rounded-lg">
                 <TrendingUp className="h-4 w-4" />
                 {metric.change}
               </span>
@@ -38,38 +38,38 @@ const Analytics = () => {
         ))}
       </div>
 
-      <Card className="p-6 shadow-card">
-        <h3 className="text-lg font-semibold mb-6">Agent Performance</h3>
-        <div className="space-y-6">
+      <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow">
+        <h3 className="text-lg font-semibold mb-6 tracking-tight">Agent Performance</h3>
+        <div className="space-y-8">
           {agentPerformance.map((agent) => (
-            <div key={agent.name} className="space-y-2">
+            <div key={agent.name} className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="font-medium">{agent.name}</span>
-                <span className="text-sm text-muted-foreground">{agent.tasks} tasks</span>
+                <span className="font-semibold text-base">{agent.name}</span>
+                <span className="text-sm font-medium text-muted-foreground bg-secondary px-3 py-1 rounded-lg">{agent.tasks} tasks</span>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div>
-                  <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">Accuracy</span>
-                    <span className="font-medium">{agent.accuracy}%</span>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="font-medium text-muted-foreground">Accuracy</span>
+                    <span className="font-bold text-success">{agent.accuracy}%</span>
                   </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                  <div className="h-3 bg-secondary rounded-full overflow-hidden shadow-inner">
                     <div
-                      className="h-full bg-success rounded-full transition-all"
+                      className="h-full bg-success rounded-full transition-all shadow-sm"
                       style={{ width: `${agent.accuracy}%` }}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-muted-foreground">Avg Speed</span>
-                    <span className="font-medium">{agent.speed}s</span>
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="font-medium text-muted-foreground">Avg Speed</span>
+                    <span className="font-bold text-primary">{agent.speed}s</span>
                   </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                  <div className="h-3 bg-secondary rounded-full overflow-hidden shadow-inner">
                     <div
-                      className="h-full bg-primary rounded-full transition-all"
+                      className="h-full bg-primary rounded-full transition-all shadow-sm"
                       style={{ width: `${100 - agent.speed * 20}%` }}
                     />
                   </div>
@@ -81,39 +81,39 @@ const Analytics = () => {
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="p-6 shadow-card">
-          <h3 className="text-lg font-semibold mb-4">Most Used Features</h3>
-          <div className="space-y-3">
+        <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow">
+          <h3 className="text-lg font-semibold mb-6 tracking-tight">Most Used Features</h3>
+          <div className="space-y-4">
             {["Code Generation", "Debug & Fix", "Code Explanation", "Optimization"].map((feature, i) => (
-              <div key={feature} className="flex items-center justify-between">
-                <span className="text-sm">{feature}</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-32 h-2 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full"
-                      style={{ width: `${90 - i * 15}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-medium w-12 text-right">{90 - i * 15}%</span>
+              <div key={feature} className="p-3 rounded-lg bg-gradient-card border border-border/50 hover:border-primary/30 transition-all">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">{feature}</span>
+                  <span className="text-sm font-bold">{90 - i * 15}%</span>
+                </div>
+                <div className="h-2.5 bg-secondary rounded-full overflow-hidden shadow-inner">
+                  <div
+                    className="h-full bg-primary rounded-full shadow-sm transition-all"
+                    style={{ width: `${90 - i * 15}%` }}
+                  />
                 </div>
               </div>
             ))}
           </div>
         </Card>
 
-        <Card className="p-6 shadow-card">
-          <h3 className="text-lg font-semibold mb-4">Weekly Activity</h3>
+        <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow">
+          <h3 className="text-lg font-semibold mb-6 tracking-tight">Weekly Activity</h3>
           <div className="space-y-3">
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, i) => (
-              <div key={day} className="flex items-center justify-between">
-                <span className="text-sm w-12">{day}</span>
-                <div className="flex-1 mx-4">
-                  <div className="h-8 bg-secondary rounded overflow-hidden">
+              <div key={day} className="flex items-center gap-3">
+                <span className="text-sm font-semibold w-12">{day}</span>
+                <div className="flex-1">
+                  <div className="h-9 bg-secondary rounded-lg overflow-hidden shadow-inner">
                     <div
-                      className="h-full bg-gradient-hero rounded transition-all flex items-center justify-end pr-2"
+                      className="h-full bg-gradient-hero rounded-lg transition-all flex items-center justify-end pr-3 shadow-sm"
                       style={{ width: `${Math.random() * 50 + 40}%` }}
                     >
-                      <span className="text-xs text-primary-foreground font-medium">
+                      <span className="text-xs text-primary-foreground font-bold">
                         {Math.floor(Math.random() * 20 + 10)}
                       </span>
                     </div>
