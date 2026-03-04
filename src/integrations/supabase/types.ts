@@ -14,7 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agent_configurations: {
+        Row: {
+          agent_description: string | null
+          agent_name: string
+          assigned_model_id: string | null
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_description?: string | null
+          agent_name: string
+          assigned_model_id?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_description?: string | null
+          agent_name?: string
+          assigned_model_id?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_configurations_assigned_model_id_fkey"
+            columns: ["assigned_model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_models: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          model_id: string
+          name: string
+          provider: string
+          status: string
+          tasks_completed: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          model_id: string
+          name: string
+          provider: string
+          status?: string
+          tasks_completed?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          model_id?: string
+          name?: string
+          provider?: string
+          status?: string
+          tasks_completed?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      aws_config: {
+        Row: {
+          id: string
+          region: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          region?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          region?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
