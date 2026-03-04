@@ -302,7 +302,7 @@ const Models = () => {
             <div>
               <Label className="text-sm font-semibold mb-2 block">Access Key ID</Label>
               <div className="p-3 rounded-lg bg-gradient-card border border-border/50 text-sm font-mono">
-                {Deno ? "Configured via secrets" : "AKIA••••••••••••"}
+                AKIA••••••••••••
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 Managed securely via Cloud secrets
