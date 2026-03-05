@@ -1,0 +1,4 @@
+project_id = "xlgxvlrphhbpnooxmttq"
+
+[functions.bedrock-invoke]
+verify_jwt = false
