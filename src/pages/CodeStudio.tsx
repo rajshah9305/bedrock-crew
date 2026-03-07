@@ -21,43 +21,45 @@ router.get('/api/users/:id', async (req, res) => {
 
 // POST create user
 router.post('/api/users', async (req, res) => {
-  // TODO: Add validation
   const user = new User(req.body);
   await user.save();
   res.status(201).json(user);
 });`);
 
-  const suggestions = [
-    { icon: Sparkles, label: "Generate", description: "Create new code from description" },
-    { icon: Code2, label: "Explain", description: "Understand what this code does" },
-    { icon: Bug, label: "Debug", description: "Find and fix issues" },
-    { icon: Zap, label: "Optimize", description: "Improve performance & quality" },
+  const actions = [
+    { icon: Sparkles, label: "Generate", description: "Create new code", shortcut: "⌘G" },
+    { icon: Code2, label: "Explain", description: "Understand code", shortcut: "⌘E" },
+    { icon: Bug, label: "Debug", description: "Find issues", shortcut: "⌘D" },
+    { icon: Zap, label: "Optimize", description: "Improve quality", shortcut: "⌘O" },
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between animate-fade-in">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Code Studio</h1>
-          <p className="text-muted-foreground mt-1">AI-powered code assistance and generation</p>
+          <h1 className="text-2xl font-bold tracking-tight">Code Studio</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">AI-powered code assistant</p>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-4">
-          <Card className="shadow-card hover:shadow-elevated transition-shadow overflow-hidden border-2 border-border/50">
-            <div className="bg-gradient-card px-5 py-3 border-b-2 border-border/50 flex items-center justify-between">
-              <span className="text-sm font-semibold tracking-tight">main.js</span>
+      <div className="grid gap-4 lg:grid-cols-4">
+        {/* Editor */}
+        <div className="lg:col-span-3 space-y-4 animate-fade-in-up" style={{ animationDelay: "100ms", animationFillMode: "backwards" }}>
+          <Card className="glass overflow-hidden hover:shadow-elevated transition-all">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/50 bg-secondary/30">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-destructive/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-warning/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-success/60" />
+                </div>
+                <span className="text-xs font-semibold text-muted-foreground ml-2">main.js</span>
+              </div>
               <div className="flex gap-1">
-                {suggestions.map((action) => (
-                  <Button
-                    key={action.label}
-                    variant="ghost"
-                    size="sm"
-                    className="h-9 px-3 hover:bg-primary/10 hover:text-primary transition-all"
-                    title={action.description}
-                  >
-                    <action.icon className="h-4 w-4" />
+                {actions.map((a) => (
+                  <Button key={a.label} variant="ghost" size="sm" className="h-7 px-2 text-xs hover:bg-primary/10 hover:text-primary">
+                    <a.icon className="h-3 w-3 mr-1" />
+                    {a.label}
                   </Button>
                 ))}
               </div>
@@ -65,21 +67,21 @@ router.post('/api/users', async (req, res) => {
             <Textarea
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              className="min-h-[400px] font-mono text-sm border-0 rounded-none resize-none focus-visible:ring-0 leading-relaxed"
+              className="min-h-[380px] font-mono text-sm border-0 rounded-none resize-none focus-visible:ring-0 leading-relaxed bg-card/50"
             />
           </Card>
 
-          <Card className="p-5 shadow-card hover:shadow-elevated transition-shadow bg-gradient-card border-2 border-primary/20">
-            <div className="flex items-start gap-4">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Sparkles className="h-5 w-5 text-primary" />
+          <Card className="p-4 glass border-primary/20 hover:shadow-glow transition-all">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                <Sparkles className="h-4 w-4 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold mb-2">AI Suggestion</p>
+                <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">AI Suggestion</p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Add input validation using express-validator before creating users. This will prevent invalid data from being saved to the database.
+                  Add input validation using express-validator before creating users. This prevents invalid data from being saved.
                 </p>
-                <Button size="sm" className="mt-4 bg-primary hover:bg-primary/90 shadow-sm hover:shadow-md transition-all">
+                <Button size="sm" className="mt-3 bg-gradient-hero hover:opacity-90 text-xs shadow-sm shadow-primary/20">
                   Apply Changes
                 </Button>
               </div>
@@ -87,48 +89,50 @@ router.post('/api/users', async (req, res) => {
           </Card>
         </div>
 
-        <div className="space-y-4">
-          <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow">
-            <h3 className="text-lg font-semibold mb-5 tracking-tight">AI Actions</h3>
-            <div className="space-y-2">
-              {suggestions.map((action) => (
+        {/* Sidebar */}
+        <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: "200ms", animationFillMode: "backwards" }}>
+          <Card className="p-4 glass hover:shadow-elevated transition-all">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Actions</h3>
+            <div className="space-y-1.5">
+              {actions.map((a) => (
                 <Button
-                  key={action.label}
-                  variant="outline"
-                  className="w-full justify-start hover:border-primary hover:bg-primary/5 transition-all p-4 h-auto"
+                  key={a.label}
+                  variant="ghost"
+                  className="w-full justify-between h-auto p-3 hover:bg-primary/5 hover:text-primary transition-all"
                 >
-                  <action.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                  <div className="text-left">
-                    <p className="font-semibold text-sm">{action.label}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{action.description}</p>
+                  <div className="flex items-center gap-2.5">
+                    <a.icon className="h-4 w-4 shrink-0" />
+                    <div className="text-left">
+                      <p className="text-xs font-bold">{a.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{a.description}</p>
+                    </div>
                   </div>
+                  <span className="text-[10px] font-mono text-muted-foreground">{a.shortcut}</span>
                 </Button>
               ))}
             </div>
           </Card>
 
-          <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow">
-            <h3 className="text-lg font-semibold mb-5 tracking-tight">Code Analysis</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-card">
-                <span className="text-sm font-medium">Complexity</span>
-                <span className="text-sm font-bold text-success">Low</span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-card">
-                <span className="text-sm font-medium">Issues Found</span>
-                <span className="text-sm font-bold text-warning">2</span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-card">
-                <span className="text-sm font-medium">Test Coverage</span>
-                <span className="text-sm font-bold text-muted-foreground">0%</span>
-              </div>
+          <Card className="p-4 glass hover:shadow-elevated transition-all">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Analysis</h3>
+            <div className="space-y-2">
+              {[
+                { label: "Complexity", value: "Low", color: "text-success" },
+                { label: "Issues", value: "2", color: "text-warning" },
+                { label: "Coverage", value: "0%", color: "text-muted-foreground" },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/50">
+                  <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
+                  <span className={`text-xs font-bold ${item.color}`}>{item.value}</span>
+                </div>
+              ))}
             </div>
           </Card>
 
-          <Card className="p-6 shadow-card bg-gradient-hero text-primary-foreground border-2 border-primary">
-            <h3 className="text-lg font-semibold mb-2.5">Pro Tip</h3>
-            <p className="text-sm opacity-95 leading-relaxed">
-              Use the Explain feature to understand unfamiliar code patterns. The AI will break down complex logic into simple steps.
+          <Card className="p-4 bg-gradient-hero text-primary-foreground">
+            <h3 className="text-xs font-bold uppercase tracking-wider opacity-90 mb-1.5">Pro Tip</h3>
+            <p className="text-xs opacity-85 leading-relaxed">
+              Use Explain to understand unfamiliar code patterns — the AI breaks down complex logic into simple steps.
             </p>
           </Card>
         </div>

@@ -1,30 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --background: 220 20% 97%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover-foreground: 222 47% 11%;
 
     --primary: 24 100% 50%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 14 100% 55%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
     --accent: 24 100% 50%;
     --accent-foreground: 0 0% 100%;
@@ -38,44 +37,45 @@ All colors MUST be HSL.
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
     --ring: 24 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --agent-planner: 217 91% 60%;
     --agent-researcher: 142 76% 45%;
     --agent-coder: 271 91% 65%;
     --agent-reviewer: 38 92% 55%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(24 100% 50%) 0%, hsl(14 100% 55%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 98%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(24 100% 50%) 0%, hsl(14 100% 55%) 50%, hsl(4 100% 60%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 20% 98%) 100%);
+    --gradient-surface: linear-gradient(135deg, hsl(220 20% 98%) 0%, hsl(0 0% 100%) 100%);
     
-    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.08);
-    --shadow-elevated: 0 8px 24px -4px hsl(0 0% 0% / 0.12);
-
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.04), 0 1px 2px -1px hsl(0 0% 0% / 0.04);
+    --shadow-elevated: 0 10px 25px -5px hsl(0 0% 0% / 0.08), 0 8px 10px -6px hsl(0 0% 0% / 0.04);
+    --shadow-glow: 0 0 30px -5px hsl(24 100% 50% / 0.2);
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 98%;
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 98%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
 
     --primary: 24 100% 50%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 14 100% 55%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 217 33% 14%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 55%;
 
     --accent: 24 100% 50%;
     --accent-foreground: 0 0% 100%;
@@ -89,12 +89,13 @@ All colors MUST be HSL.
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 0%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
     --ring: 24 100% 50%;
 
-    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.4);
-    --shadow-elevated: 0 8px 24px -4px hsl(0 0% 0% / 0.5);
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
+    --shadow-elevated: 0 10px 25px -5px hsl(0 0% 0% / 0.3), 0 8px 10px -6px hsl(0 0% 0% / 0.2);
+    --shadow-glow: 0 0 30px -5px hsl(24 100% 50% / 0.3);
   }
 }
 
@@ -102,8 +103,26 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+  .glass-strong {
+    @apply bg-card/95 backdrop-blur-2xl border border-border/50;
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-glow;
+  }
+  .glow-sm {
+    box-shadow: var(--shadow-glow);
+  }
+  .glow-ring {
+    @apply ring-2 ring-primary/20;
   }
 }
