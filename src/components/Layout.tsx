@@ -1,5 +1,6 @@
 import { Outlet, NavLink } from "react-router-dom";
 import { LayoutDashboard, GitBranch, Code2, Settings, History, BarChart3, Brain } from "lucide-react";
+import ChatInput from "./ChatInput";
 
 const Layout = () => {
   const navigation = [
