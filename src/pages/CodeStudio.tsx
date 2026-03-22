@@ -1,23 +1,8 @@
-import { Code2, Sparkles, Bug, Zap } from "lucide-react";
+import { Code2, Sparkles, Bug, Zap, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-
-const VALIDATION_SNIPPET = `
-// Input validation middleware
-const { body, validationResult } = require('express-validator');
-
-const validateUser = [
-  body('email').isEmail().normalizeEmail(),
-  body('name').trim().notEmpty(),
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-    next();
-  },
-];
-`;
 
 const CodeStudio = () => {
   const [code, setCode] = useState(`// Express.js User Profile API
@@ -41,11 +26,48 @@ router.post('/api/users', async (req, res) => {
   res.status(201).json(user);
 });`);
 
+  const [loading, setLoading] = useState(false);
+  const [suggestion, setSuggestion] = useState<string | null>(null);
+
+  const handleAction = async (action: string) => {
+    const apiKey = sessionStorage.getItem("groq_api_key");
+    if (!apiKey) {
+      alert("Please set your Groq API key in the chat first (/key gsk_...)");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "";
+      const prompt = `${action} this code:\n\n${code}`;
+
+      const resp = await fetch(`${apiUrl}/api/process`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: prompt,
+          api_key: apiKey,
+          model: "llama-3.3-70b-versatile",
+          options: {}
+        }),
+      });
+
+      const data = await resp.json();
+      if (data.result) {
+        setSuggestion(data.result);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const actions = [
-    { icon: Sparkles, label: "Generate", description: "Create new code", shortcut: "⌘G" },
-    { icon: Code2, label: "Explain", description: "Understand code", shortcut: "⌘E" },
-    { icon: Bug, label: "Debug", description: "Find issues", shortcut: "⌘D" },
-    { icon: Zap, label: "Optimize", description: "Improve quality", shortcut: "⌘O" },
+    { icon: Sparkles, label: "Generate", description: "Create new code", shortcut: "⌘G", action: "Complete or generate more" },
+    { icon: Code2, label: "Explain", description: "Understand code", shortcut: "⌘E", action: "Explain" },
+    { icon: Bug, label: "Debug", description: "Find issues", shortcut: "⌘D", action: "Debug and fix" },
+    { icon: Zap, label: "Optimize", description: "Improve quality", shortcut: "⌘O", action: "Optimize and refactor" },
   ];
 
   return (
@@ -72,8 +94,15 @@ router.post('/api/users', async (req, res) => {
               </div>
               <div className="flex gap-1">
                 {actions.map((a) => (
-                  <Button key={a.label} variant="ghost" size="sm" className="h-7 px-2 text-xs hover:bg-primary/8 hover:text-primary text-black/50">
-                    <a.icon className="h-3 w-3 mr-1" />
+                  <Button
+                    key={a.label}
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs hover:bg-primary/8 hover:text-primary text-black/50"
+                    onClick={() => handleAction(a.action)}
+                    disabled={loading}
+                  >
+                    {loading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <a.icon className="h-3 w-3 mr-1" />}
                     {a.label}
                   </Button>
                 ))}
@@ -86,26 +115,47 @@ router.post('/api/users', async (req, res) => {
             />
           </Card>
 
-          <Card className="p-4 bg-white border border-primary/20 hover:shadow-glow transition-all">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                <Sparkles className="h-4 w-4 text-primary" />
+          {suggestion && (
+            <Card className="p-4 bg-white border border-primary/20 hover:shadow-glow transition-all animate-scale-in">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-bold text-primary uppercase tracking-wider">AI Suggestion</p>
+                    <button onClick={() => setSuggestion(null)} className="text-black/30 hover:text-black">✕</button>
+                  </div>
+                  <pre className="text-xs text-black/70 leading-relaxed font-mono bg-black/2 p-3 rounded-lg max-h-60 overflow-y-auto">
+                    {suggestion}
+                  </pre>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      size="sm"
+                      className="bg-gradient-hero hover:opacity-90 text-xs shadow-sm shadow-primary/20 text-white active:scale-95 transition-transform"
+                      onClick={() => {
+                        setCode(suggestion);
+                        setSuggestion(null);
+                      }}
+                    >
+                      Replace Code
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs border-black/10"
+                      onClick={() => {
+                        setCode(prev => prev + "\n\n" + suggestion);
+                        setSuggestion(null);
+                      }}
+                    >
+                      Append Code
+                    </Button>
+                  </div>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">AI Suggestion</p>
-                <p className="text-sm text-black/60 leading-relaxed">
-                  Add input validation using express-validator before creating users. This prevents invalid data from being saved.
-                </p>
-                <Button
-                  size="sm"
-                  className="mt-3 bg-gradient-hero hover:opacity-90 text-xs shadow-sm shadow-primary/20 text-white active:scale-95 transition-transform"
-                  onClick={() => setCode(prev => VALIDATION_SNIPPET + prev)}
-                >
-                  Apply Changes
-                </Button>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -118,9 +168,11 @@ router.post('/api/users', async (req, res) => {
                   key={a.label}
                   variant="ghost"
                   className="w-full justify-between h-auto p-3 hover:bg-primary/5 hover:text-primary transition-all text-black"
+                  onClick={() => handleAction(a.action)}
+                  disabled={loading}
                 >
                   <div className="flex items-center gap-2.5">
-                    <a.icon className="h-4 w-4 shrink-0" />
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <a.icon className="h-4 w-4 shrink-0" />}
                     <div className="text-left">
                       <p className="text-xs font-bold">{a.label}</p>
                       <p className="text-[10px] text-black/40">{a.description}</p>
