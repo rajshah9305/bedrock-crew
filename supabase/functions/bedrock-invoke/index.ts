@@ -22,10 +22,10 @@ async function sha256(data: string): Promise<string> {
 }
 
 async function getSignatureKey(key: string, dateStamp: string, region: string, service: string) {
-  let kDate = await hmacSha256(new TextEncoder().encode("AWS4" + key), dateStamp);
-  let kRegion = await hmacSha256(new Uint8Array(kDate), region);
-  let kService = await hmacSha256(new Uint8Array(kRegion), service);
-  let kSigning = await hmacSha256(new Uint8Array(kService), "aws4_request");
+  const kDate = await hmacSha256(new TextEncoder().encode("AWS4" + key), dateStamp);
+  const kRegion = await hmacSha256(new Uint8Array(kDate), region);
+  const kService = await hmacSha256(new Uint8Array(kRegion), service);
+  const kSigning = await hmacSha256(new Uint8Array(kService), "aws4_request");
   return new Uint8Array(kSigning);
 }
 
@@ -41,7 +41,7 @@ async function signRequest(
 ) {
   const urlObj = new URL(url);
   const now = new Date();
-  const amzDate = now.toISOString().replace(/[:\-]|\.\d{3}/g, "").slice(0, 15) + "Z";
+  const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "").slice(0, 15) + "Z";
   const dateStamp = amzDate.slice(0, 8);
 
   headers["x-amz-date"] = amzDate;
@@ -107,7 +107,7 @@ serve(async (req) => {
     }
 
     // Build the Bedrock request body based on model provider
-    let bedrockBody: any;
+    let bedrockBody: Record<string, unknown>;
 
     if (model_id.startsWith("anthropic.")) {
       bedrockBody = {
@@ -167,11 +167,11 @@ serve(async (req) => {
     // Normalize response across model types
     let output = "";
     if (result.content && Array.isArray(result.content)) {
-      output = result.content.map((c: any) => c.text).join("");
+      output = result.content.map((c: { text: string }) => c.text).join("");
     } else if (result.generation) {
       output = result.generation;
     } else if (result.results) {
-      output = result.results.map((r: any) => r.outputText).join("");
+      output = result.results.map((r: { outputText: string }) => r.outputText).join("");
     } else {
       output = JSON.stringify(result);
     }

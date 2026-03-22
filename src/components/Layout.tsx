@@ -69,8 +69,8 @@ const Layout = () => {
           } catch { /* partial chunk */ }
         }
       }
-    } catch (err: any) {
-      setChatMessages(prev => [...prev, { role: "assistant", content: `Error: ${err.message}` }]);
+    } catch (err: unknown) {
+      setChatMessages(prev => [...prev, { role: "assistant", content: `Error: ${err instanceof Error ? err.message : String(err)}` }]);
     } finally {
       setChatLoading(false);
     }

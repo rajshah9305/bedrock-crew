@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ElementType } from "react";
 import { Settings, Zap, Brain, Database, Loader2, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-const ICON_MAP: Record<string, React.ElementType> = { brain: Brain, zap: Zap, database: Database };
+const ICON_MAP: Record<string, ElementType> = { brain: Brain, zap: Zap, database: Database };
 const AWS_REGIONS = ["us-east-1", "us-east-2", "us-west-2", "eu-west-1", "eu-central-1", "ap-southeast-1", "ap-northeast-1"];
 
 const Models = () => {
@@ -82,8 +82,8 @@ const Models = () => {
       });
       if (error) throw error;
       setTestResult(data?.error ? `❌ ${data.error}` : data?.output || "No output");
-    } catch (err: any) {
-      setTestResult(`❌ ${err.message}`);
+    } catch (err: unknown) {
+      setTestResult(`❌ ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setTestingModelId(null);
     }
