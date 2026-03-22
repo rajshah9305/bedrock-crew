@@ -1,32 +1,52 @@
 import { Brain, Zap, Target, TrendingUp, ArrowUpRight, Activity } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { ExecutionEntry } from "@/types/execution";
 
 const Dashboard = () => {
+  const [history, setHistory] = useState<ExecutionEntry[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("execution_history");
+    if (saved) {
+      setHistory(JSON.parse(saved));
+    }
+  }, []);
+
+  const tasksCompleted = history.filter(h => h.status === "completed").length;
+  const successRate = history.length > 0
+    ? Math.round((tasksCompleted / history.length) * 100)
+    : 100;
+
   const stats = [
-    { label: "Active Agents", value: "4", icon: Brain, change: "+1" },
-    { label: "Tasks Completed", value: "127", icon: Target, change: "+12" },
-    { label: "Avg Response", value: "2.3s", icon: Zap, change: "-0.4s" },
-    { label: "Success Rate", value: "94%", icon: TrendingUp, change: "+2.1%" },
+    { label: "Active Agents", value: "4", icon: Brain, change: "+0" },
+    { label: "Tasks Completed", value: tasksCompleted.toString(), icon: Target, change: `+${tasksCompleted}` },
+    { label: "Avg Response", value: "1.8s", icon: Zap, change: "-0.5s" },
+    { label: "Success Rate", value: `${successRate}%`, icon: TrendingUp, change: "+0%" },
   ];
 
   const agents = [
-    { name: "Planner", status: "active", tasks: 32 },
-    { name: "Researcher", status: "active", tasks: 28 },
-    { name: "Coder", status: "active", tasks: 41 },
-    { name: "Reviewer", status: "idle", tasks: 26 },
+    { name: "Planner", status: "active", tasks: Math.floor(tasksCompleted * 0.25) },
+    { name: "Researcher", status: "active", tasks: Math.floor(tasksCompleted * 0.2) },
+    { name: "Coder", status: "active", tasks: Math.floor(tasksCompleted * 0.35) },
+    { name: "Reviewer", status: "idle", tasks: Math.floor(tasksCompleted * 0.2) },
   ];
 
-  const recentTasks = [
-    { id: 1, task: "Generate API endpoint for user authentication", status: "completed", agent: "Coder", time: "2m ago" },
-    { id: 2, task: "Debug memory leak in data processing", status: "in-progress", agent: "Reviewer", time: "5m ago" },
-    { id: 3, task: "Research async operation best practices", status: "completed", agent: "Researcher", time: "12m ago" },
-    { id: 4, task: "Plan microservice architecture migration", status: "completed", agent: "Planner", time: "1h ago" },
+  const recentTasks = history.slice(0, 4).map((h, i) => ({
+    id: h.id || i,
+    task: h.input,
+    status: h.status,
+    agent: ["Coder", "Researcher", "Planner", "Reviewer"][i % 4],
+    time: new Date(h.timestamp).toLocaleTimeString()
+  }));
+
+  const displayTasks = recentTasks.length > 0 ? recentTasks : [
+    { id: 1, task: "No tasks executed yet", status: "idle", agent: "N/A", time: "Now" }
   ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-black">Dashboard</h1>
@@ -38,7 +58,6 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, i) => (
           <Card
@@ -64,9 +83,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Two Column Layout */}
       <div className="grid gap-4 lg:grid-cols-5">
-        {/* Agents */}
         <Card
           className="lg:col-span-2 p-5 bg-white border border-black/8 hover:shadow-elevated transition-all animate-fade-in-up"
           style={{ animationDelay: "320ms", animationFillMode: "backwards" }}
@@ -97,7 +114,6 @@ const Dashboard = () => {
           </div>
         </Card>
 
-        {/* Recent Tasks */}
         <Card
           className="lg:col-span-3 p-5 bg-white border border-black/8 hover:shadow-elevated transition-all animate-fade-in-up"
           style={{ animationDelay: "400ms", animationFillMode: "backwards" }}
@@ -107,7 +123,7 @@ const Dashboard = () => {
             <Button variant="ghost" size="sm" className="text-xs text-primary hover:text-primary font-semibold">View All</Button>
           </div>
           <div className="space-y-2">
-            {recentTasks.map((task) => (
+            {displayTasks.map((task) => (
               <div key={task.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-black/3 transition-colors cursor-pointer group">
                 <div className={`w-1.5 h-8 rounded-full shrink-0 ${
                   task.status === "completed" ? "bg-primary" : "bg-primary/40"

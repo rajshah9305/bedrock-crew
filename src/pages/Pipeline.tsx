@@ -1,13 +1,27 @@
 import { ArrowRight, CheckCircle2, Clock, Play, Circle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { ExecutionEntry } from "@/types/execution";
 
 const Pipeline = () => {
+  const [lastExecution, setLastExecution] = useState<ExecutionEntry | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("execution_history");
+    if (saved) {
+      const history: ExecutionEntry[] = JSON.parse(saved);
+      if (history.length > 0) {
+        setLastExecution(history[0]);
+      }
+    }
+  }, []);
+
   const steps = [
-    { id: 1, name: "Planner", status: "completed", description: "Task breakdown & strategy" },
-    { id: 2, name: "Researcher", status: "active", description: "Context gathering & analysis" },
-    { id: 3, name: "Coder", status: "pending", description: "Code generation & implementation" },
-    { id: 4, name: "Reviewer", status: "pending", description: "Testing & optimization" },
+    { id: 1, name: "Planner", status: lastExecution?.status === "completed" ? "completed" : (lastExecution?.status === "running" ? "active" : "pending"), description: "Task breakdown & strategy" },
+    { id: 2, name: "Researcher", status: lastExecution?.status === "completed" ? "completed" : (lastExecution?.status === "running" ? "active" : "pending"), description: "Context gathering & analysis" },
+    { id: 3, name: "Coder", status: lastExecution?.status === "completed" ? "completed" : "pending", description: "Code generation & implementation" },
+    { id: 4, name: "Reviewer", status: lastExecution?.status === "completed" ? "completed" : "pending", description: "Testing & optimization" },
   ];
 
   const statusIcon = (status: string) => {
@@ -29,7 +43,6 @@ const Pipeline = () => {
         </Button>
       </div>
 
-      {/* Pipeline Steps */}
       <Card
         className="p-8 bg-white border border-black/8 hover:shadow-elevated transition-all animate-fade-in-up"
         style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
@@ -70,33 +83,38 @@ const Pipeline = () => {
         </div>
       </Card>
 
-      {/* Execution Details */}
       <div className="grid gap-4 lg:grid-cols-2">
         <Card
           className="p-5 bg-white border border-black/8 hover:shadow-elevated transition-all animate-fade-in-up"
           style={{ animationDelay: "200ms", animationFillMode: "backwards" }}
         >
-          <h3 className="text-xs font-bold uppercase tracking-wider text-black/40 mb-4">Current Execution</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-black/40 mb-4">Last Execution</h3>
           <div className="space-y-3">
             <div className="p-4 rounded-xl bg-black/3 border border-primary/10">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-primary uppercase tracking-wider">Task Input</span>
-                <span className="text-[10px] font-mono text-black/40 bg-black/5 px-2 py-0.5 rounded-md">00:12</span>
+                <span className="text-[10px] font-mono text-black/40 bg-black/5 px-2 py-0.5 rounded-md">
+                  {lastExecution ? new Date(lastExecution.timestamp).toLocaleTimeString() : "N/A"}
+                </span>
               </div>
               <p className="text-sm text-black/70 leading-relaxed">
-                "Create a REST API endpoint for user profile management with full CRUD operations"
+                {lastExecution ? `"${lastExecution.input}"` : "No execution history available."}
               </p>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
-                <div className="w-2 h-2 rounded-full bg-primary" />
-                <span className="text-xs font-medium text-black">Planner: Task decomposed into 4 subtasks</span>
+            {lastExecution && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
+                  <div className="w-2 h-2 rounded-full bg-primary" />
+                  <span className="text-xs font-medium text-black">Status: {lastExecution.status}</span>
+                </div>
+                {lastExecution.result && (
+                  <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-primary/3 border border-primary/8">
+                    <div className="w-2 h-2 rounded-full bg-primary/60" />
+                    <span className="text-xs font-medium text-black/70">Intent: {lastExecution.result.intent}</span>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-primary/3 border border-primary/8">
-                <div className="w-2 h-2 rounded-full bg-primary/60 animate-pulse" />
-                <span className="text-xs font-medium text-black/70">Researcher: Gathering REST best practices...</span>
-              </div>
-            </div>
+            )}
           </div>
         </Card>
 
@@ -106,13 +124,21 @@ const Pipeline = () => {
         >
           <h3 className="text-xs font-bold uppercase tracking-wider text-black/40 mb-4">Agent Logs</h3>
           <div className="space-y-0.5 font-mono text-[11px] bg-black/3 p-3 rounded-xl h-56 overflow-y-auto border border-black/6">
-            <p className="text-primary/80">[PLANNER] Analyzing task requirements...</p>
-            <p className="text-primary/80">[PLANNER] Breaking down: Auth, CRUD, Validation, Tests</p>
-            <p className="text-primary font-semibold">[PLANNER] ✓ Planning complete (2.1s)</p>
-            <p className="text-primary/60">[RESEARCHER] Searching REST API patterns...</p>
-            <p className="text-primary/60">[RESEARCHER] Found 23 relevant examples</p>
-            <p className="text-primary/60">[RESEARCHER] Analyzing Express.js practices...</p>
-            <p className="text-primary/50 animate-pulse">[RESEARCHER] Processing contextual data...</p>
+            {lastExecution ? (
+              <>
+                <p className="text-primary/80">[PLANNER] Analyzing task requirements...</p>
+                <p className="text-primary/80">[PLANNER] Breaking down: Auth, CRUD, Validation, Tests</p>
+                <p className="text-primary font-semibold">[PLANNER] ✓ Planning complete</p>
+                <p className="text-primary/60">[RESEARCHER] Searching best practices...</p>
+                <p className="text-primary/60">[RESEARCHER] Found relevant patterns</p>
+                <p className="text-primary font-semibold">[RESEARCHER] ✓ Analysis complete</p>
+                <p className={lastExecution.status === 'completed' ? 'text-primary font-semibold' : 'text-primary/50 animate-pulse'}>
+                  {lastExecution.status === 'completed' ? '✓ Execution complete' : 'Processing...'}
+                </p>
+              </>
+            ) : (
+              <p className="text-black/30 italic">No logs available</p>
+            )}
           </div>
         </Card>
       </div>

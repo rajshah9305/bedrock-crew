@@ -1,11 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import { LayoutDashboard, GitBranch, Code2, Settings, History, BarChart3, Brain, Sparkles } from "lucide-react";
 import ChatInput from "./ChatInput";
+import { ExecutionEntry } from "@/types/execution";
+
+interface Model {
+  id: string;
+  name: string;
+}
 
 const Layout = () => {
   const [chatMessages, setChatMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [chatLoading, setChatLoading] = useState(false);
+  const [models, setModels] = useState<Model[]>([]);
+  const [selectedModel, setSelectedModel] = useState("llama-3.3-70b-versatile");
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || "";
+        const resp = await fetch(`${apiUrl}/api/models`);
+        const data = await resp.json();
+        if (data.models) setModels(data.models);
+      } catch (err) {
+        console.error("Failed to fetch models:", err);
+      }
+    };
+    fetchModels();
+  }, []);
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -18,8 +40,20 @@ const Layout = () => {
 
   const getApiKey = () => sessionStorage.getItem("groq_api_key") ?? "";
 
-  const handleChatSubmit = async (message: string) => {
-    // Handle /key command before anything else
+  const saveExecution = (input: string, status: ExecutionEntry['status'], result?: ExecutionEntry['result']) => {
+    const saved = localStorage.getItem("execution_history");
+    const history: ExecutionEntry[] = saved ? JSON.parse(saved) : [];
+    const newEntry: ExecutionEntry = {
+      id: Date.now(),
+      input,
+      status,
+      result,
+      timestamp: new Date().toISOString(),
+    };
+    localStorage.setItem("execution_history", JSON.stringify([newEntry, ...history].slice(0, 50)));
+  };
+
+  const handleChatSubmit = async (message: string, modelId: string = selectedModel) => {
     if (message.startsWith("/key ")) {
       const key = message.slice(5).trim();
       sessionStorage.setItem("groq_api_key", key);
@@ -54,52 +88,62 @@ const Layout = () => {
         body: JSON.stringify({
           messages: [...chatMessages, userMsg],
           api_key: apiKey,
-          model: "llama-3.3-70b-versatile",
+          model: modelId,
         }),
       });
 
       if (!resp.ok || !resp.body) {
         const errText = await resp.text().catch(() => "");
+        saveExecution(message, "failed");
         throw new Error(resp.status === 429 ? "Rate limited — try again shortly" : errText || "Chat request failed");
       }
 
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let isDone = false;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
+      try {
+        while (!isDone) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
 
-        let newlineIdx: number;
-        while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
-          let line = buffer.slice(0, newlineIdx);
-          buffer = buffer.slice(newlineIdx + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            if (parsed.error) throw new Error(parsed.error);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantContent += content;
-              setChatMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === "assistant") {
-                  return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantContent } : m);
-                }
-                return [...prev, { role: "assistant", content: assistantContent }];
-              });
+          let newlineIdx: number;
+          while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
+            let line = buffer.slice(0, newlineIdx);
+            buffer = buffer.slice(newlineIdx + 1);
+            if (line.endsWith("\r")) line = line.slice(0, -1);
+            if (!line.startsWith("data: ")) continue;
+            const jsonStr = line.slice(6).trim();
+            if (jsonStr === "[DONE]") {
+              isDone = true;
+              saveExecution(message, "completed", { intent: "chat" });
+              break;
             }
-          } catch (parseErr) {
-            if (parseErr instanceof Error && parseErr.message !== "Unexpected end of JSON input") {
-              throw parseErr;
+            try {
+              const parsed = JSON.parse(jsonStr);
+              if (parsed.error) throw new Error(parsed.error);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                assistantContent += content;
+                setChatMessages(prev => {
+                  const last = prev[prev.length - 1];
+                  if (last?.role === "assistant") {
+                    return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantContent } : m);
+                  }
+                  return [...prev, { role: "assistant", content: assistantContent }];
+                });
+              }
+            } catch (parseErr) {
+              if (parseErr instanceof Error && parseErr.message !== "Unexpected end of JSON input") {
+                throw parseErr;
+              }
             }
           }
         }
+      } finally {
+        reader.releaseLock();
       }
     } catch (err: unknown) {
       setChatMessages(prev => [
@@ -113,10 +157,8 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
       <header className="sticky top-0 z-50 w-full bg-white border-b border-black/8 shadow-[0_1px_0_0_hsl(0_0%_0%/0.06)]">
         <div className="container flex h-16 items-center justify-between px-6 max-w-7xl mx-auto">
-          {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="relative p-2.5 rounded-xl bg-gradient-hero shadow-glow">
               <Brain className="h-5 w-5 text-white" />
@@ -127,11 +169,10 @@ const Layout = () => {
                 AI Pipeline
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
               </h1>
-              <p className="text-[10px] font-medium text-black/40 tracking-wider uppercase">CrewAI × AWS Bedrock</p>
+              <p className="text-[10px] font-medium text-black/40 tracking-wider uppercase">Unified NLP Interface</p>
             </div>
           </div>
 
-          {/* Nav */}
           <nav className="flex items-center gap-0.5 bg-black/4 p-1 rounded-xl">
             {navigation.map((item) => (
               <NavLink
@@ -154,16 +195,17 @@ const Layout = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container py-6 px-6 max-w-7xl mx-auto flex-1 pb-2">
         <Outlet />
       </main>
 
-      {/* Chat — elevated, not stuck to very bottom */}
       <ChatInput
         onSubmit={handleChatSubmit}
         loading={chatLoading}
         messages={chatMessages}
+        models={models}
+        selectedModel={selectedModel}
+        onModelChange={setSelectedModel}
       />
     </div>
   );

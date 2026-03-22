@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Bot, User, X, MessageSquare, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Send, Loader2, Bot, User, X, MessageSquare, Sparkles, Settings2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface ChatMessage {
@@ -9,14 +9,30 @@ interface ChatMessage {
   content: string;
 }
 
+interface Model {
+  id: string;
+  name: string;
+}
+
 interface ChatInputProps {
-  onSubmit: (message: string) => void;
+  onSubmit: (message: string, modelId: string) => void;
   loading?: boolean;
   disabled?: boolean;
   messages?: ChatMessage[];
+  models?: Model[];
+  selectedModel?: string;
+  onModelChange?: (modelId: string) => void;
 }
 
-const ChatInput = ({ onSubmit, loading = false, disabled = false, messages = [] }: ChatInputProps) => {
+const ChatInput = ({
+  onSubmit,
+  loading = false,
+  disabled = false,
+  messages = [],
+  models = [],
+  selectedModel = "llama-3.3-70b-versatile",
+  onModelChange
+}: ChatInputProps) => {
   const [input, setInput] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -30,7 +46,7 @@ const ChatInput = ({ onSubmit, loading = false, disabled = false, messages = [] 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && !loading && !disabled) {
-      onSubmit(input.trim());
+      onSubmit(input.trim(), selectedModel);
       setInput("");
       setExpanded(true);
       textareaRef.current?.focus();
@@ -134,14 +150,35 @@ const ChatInput = ({ onSubmit, loading = false, disabled = false, messages = [] 
               <Sparkles className="h-3 w-3" />
               AI Assistant
             </div>
-            {messages.length > 0 && !expanded && (
-              <button
-                onClick={() => setExpanded(true)}
-                className="ml-auto text-[11px] text-black/40 hover:text-primary transition-colors font-medium"
-              >
-                {messages.length} message{messages.length !== 1 ? "s" : ""} · show
-              </button>
-            )}
+
+            <div className="ml-auto flex items-center gap-3">
+              {models.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Settings2 className="h-3 w-3 text-black/30" />
+                  <Select value={selectedModel} onValueChange={onModelChange}>
+                    <SelectTrigger className="h-6 border-0 bg-transparent p-0 text-[11px] font-medium text-black/40 hover:text-primary transition-colors focus:ring-0 shadow-none gap-1">
+                      <SelectValue placeholder="Model" />
+                    </SelectTrigger>
+                    <SelectContent align="end" className="bg-white border-black/8 shadow-elevated">
+                      {models.map((m) => (
+                        <SelectItem key={m.id} value={m.id} className="text-xs">
+                          {m.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {messages.length > 0 && !expanded && (
+                <button
+                  onClick={() => setExpanded(true)}
+                  className="text-[11px] text-black/40 hover:text-primary transition-colors font-medium"
+                >
+                  {messages.length} message{messages.length !== 1 ? "s" : ""} · show
+                </button>
+              )}
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="flex items-end gap-2 px-3 pb-3">
