@@ -7,15 +7,16 @@ The backend/ directory with crewai/langchain is not used here — those
 deps exceed Vercel's 250 MB limit.
 """
 import re
+import json
 import time
 import logging
 import os
 from enum import Enum
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -177,6 +178,18 @@ class ProcessResponse(BaseModel):
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
+class ChatRequest(BaseModel):
+    messages: List[ChatMessage]
+    api_key: str
+    model: str = "llama-3.3-70b-versatile"
+
+
 class ErrorResponse(BaseModel):
     error: str
     detail: Optional[str] = None
@@ -232,6 +245,41 @@ async def list_models():
             for model_id, cfg in GROQ_MODELS.items()
         ]
     }
+
+
+
+@app.post("/api/chat")
+@limiter.limit(f"{RATE_LIMIT}/minute")
+async def chat_stream(request: Request, payload: ChatRequest):
+    """Streaming chat endpoint — returns SSE compatible with OpenAI format"""
+    client = AsyncGroq(api_key=payload.api_key)
+
+    async def event_stream():
+        try:
+            stream = await client.chat.completions.create(
+                model=payload.model,
+                messages=[{"role": m.role, "content": m.content} for m in payload.messages],
+                stream=True,
+                max_tokens=2048,
+            )
+            async for chunk in stream:
+                delta = chunk.choices[0].delta.content if chunk.choices else None
+                if delta:
+                    data = json.dumps({"choices": [{"delta": {"content": delta}}]})
+                    yield f"data: {data}\n\n"
+            yield "data: [DONE]\n\n"
+        except Exception as e:
+            err = json.dumps({"error": str(e)})
+            yield f"data: {err}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        }
+    )
 
 
 @app.post(
