@@ -44,7 +44,7 @@ const Layout = () => {
     const userMsg = { role: "user" as const, content: message };
     setChatMessages(prev => [...prev, userMsg]);
 
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+    const apiUrl = import.meta.env.VITE_API_URL || "";
     let assistantContent = "";
 
     try {
